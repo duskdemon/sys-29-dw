@@ -41,6 +41,7 @@ resource "yandex_vpc_subnet" "sys-29-dw-subnet-3" {
 #
 resource "yandex_compute_instance" "sys-29-dw-basthost" {
   name        = "sys-29-dw-basthost"
+  hostname    = "sys-29-dw-basthost"
   platform_id = "standard-v1"
   zone           = "ru-central1-b"
 
@@ -61,15 +62,16 @@ resource "yandex_compute_instance" "sys-29-dw-basthost" {
   }
 
   metadata = {
-    user-data = "${file("./meta.yml")}"
+    user-data = "${file("./meta_bh.yml")}"
   }
-
+ 
   scheduling_policy {
     preemptible = "true"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-zabbix" {
   name        = "sys-29-dw-zabbix"
+  hostname    = "sys-29-dw-zabbix"
   platform_id = "standard-v1"
   zone           = "ru-central1-b"
 
@@ -99,6 +101,7 @@ resource "yandex_compute_instance" "sys-29-dw-zabbix" {
 }
 resource "yandex_compute_instance" "sys-29-dw-kibana" {
   name        = "sys-29-dw-kibana"
+  hostname    = "sys-29-dw-kibana"
   platform_id = "standard-v1"
   zone           = "ru-central1-b"
 
@@ -128,6 +131,7 @@ resource "yandex_compute_instance" "sys-29-dw-kibana" {
 }
 resource "yandex_compute_instance" "sys-29-dw-web1" {
   name        = "sys-29-dw-web1"
+  hostname    = "sys-29-dw-web1"
   platform_id = "standard-v1"
   zone           = "ru-central1-a"
 
@@ -156,6 +160,7 @@ resource "yandex_compute_instance" "sys-29-dw-web1" {
 }
 resource "yandex_compute_instance" "sys-29-dw-web2" {
   name        = "sys-29-dw-web2"
+  hostname    = "sys-29-dw-web2"
   platform_id = "standard-v2"
   zone           = "ru-central1-d"
 
@@ -184,6 +189,7 @@ resource "yandex_compute_instance" "sys-29-dw-web2" {
 }
 resource "yandex_compute_instance" "sys-29-dw-elas" {
   name        = "sys-29-dw-elas"
+  hostname    = "sys-29-dw-elas"
   platform_id = "standard-v1"
   zone           = "ru-central1-a"
 

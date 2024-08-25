@@ -1,0 +1,18 @@
+---
+- hosts: web
+  become: yes
+  tasks:
+  
+  - lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '^%sudo'
+      line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: install apache2
+    ansible.builtin.apt:
+      name: apache2
+      state: latest
+      update_cache: yes
+    when: ansible_facts ['distribution'] == "Debian"
