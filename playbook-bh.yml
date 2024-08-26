@@ -1,0 +1,29 @@
+---
+- hosts: basthost
+  become: yes
+  tasks:
+
+  - name: making dirs for ansible files
+    ansible.builtin.file:
+      path: /home/dusk/ansible/teplates
+      state: directory
+  - name: copying ansible.cfg
+    ansible.builtin.copy:
+      src: ./ansible.cfg
+      dest: /home/dusk/ansible
+  - name: copying index.html template
+    ansible.builtin.copy:
+      src: ./templates/index.html.j2
+      dest: /home/dusk/ansible/templates
+  - name: copying inventory
+    ansible.builtin.copy:
+      src: ./inventory_elas.ini
+      dest: /home/dusk/ansible
+      src: ./inventory_web.ini
+      dest: /home/dusk/ansible
+  - name: copying playbooks
+    ansible.builtin.copy:
+      src: ./playbook-web.yml
+      dest: /home/dusk/ansible
+      src: ./playbook-elas.yml
+      dest: /home/dusk/ansible

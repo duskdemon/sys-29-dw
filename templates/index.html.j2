@@ -1,0 +1,6 @@
+<html>
+  <body>
+    <h1> {{ ansible_hostname }} </h1>
+    <br><b>CPUs:{{ ansible_processor_vcpus }} RAM:{{ ansible_memtotal_mb }}mb Disk:{{ ansible_devices.vda.partitions.vda1.size }} IPv4:{{ ansible_default_ipv4.address }}</b>
+  </body>
+</html> 
