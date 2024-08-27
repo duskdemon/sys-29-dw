@@ -5,7 +5,7 @@
 
   - name: making dirs for ansible files
     ansible.builtin.file:
-      path: /home/dusk/ansible/teplates
+      path: /home/dusk/ansible/templates
       state: directory
   - name: copying ansible.cfg
     ansible.builtin.copy:
@@ -15,15 +15,19 @@
     ansible.builtin.copy:
       src: ./templates/index.html.j2
       dest: /home/dusk/ansible/templates
-  - name: copying inventory
+  - name: copying inventory elas
     ansible.builtin.copy:
       src: ./inventory_elas.ini
       dest: /home/dusk/ansible
+  - name: copying inventory web
+    ansible.builtin.copy:
       src: ./inventory_web.ini
       dest: /home/dusk/ansible
-  - name: copying playbooks
+  - name: copying playbook elas
+    ansible.builtin.copy:
+      src: ./playbook-elas.yml
+      dest: /home/dusk/ansible
+  - name: copying playbook web
     ansible.builtin.copy:
       src: ./playbook-web.yml
-      dest: /home/dusk/ansible
-      src: ./playbook-elas.yml
       dest: /home/dusk/ansible

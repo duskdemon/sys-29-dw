@@ -32,14 +32,52 @@ resources.tf - разворачиваем хосты:
 
 8. Подготовка Ansible плейбука для раскатки Zabbix на хостах.
 
-__Список файлов__
+### Список файлов
 
 /img
-    scheme01.png    схема проекта
-/templates
-    index.html.j2   шаблон файла index.html для веб-серверов
 
-ansible.cfg     конфиг Ансибл
-inventory*      файлы инвентори для Ансибл
-playbook*       файлы плейбуков для Ансибл
-*.tf            файлы конфига терраформ
+scheme01.png - схема проекта
+
+/templates
+
+index.html.j2 - шаблон файла index.html для веб-серверов
+
+
+ansible.cfg - конфиг Ансибл
+
+inventory* - файлы инвентори для Ансибл
+
+playbook* - файлы плейбуков для Ансибл
+
+*.tf - файлы конфига терраформ
+
+network.tf - конфигурация сетей и подсетей
+
+main.tf - конфигурация ВМ
+
+resources.tf - конфигурация целевых групп, групп бэкэндов, роутера и балансировщика
+
+### Порядок развертывания
+
+1. Запуск скрипта init.sh для получения свежего токена yandex cloud
+
+2. Запуск терраформа:
+
+```
+terraform plan --out=current
+terraform apply current
+```
+3. Запуск ансибл плейбука для передачи конфигов на бастион-хост (basthost):
+
+скорректировать ip-адрес basthost согласно output терраформа в inventory_bh.ini
+```
+ansible-playbook -i inventory_bh.ini playbook-bh.yml
+```
+
+4. Подключаемся на basthost и запускаем плейбуки для раскатки web, ...
+
+```
+ssh -i ~/.ssh/dw dusk@89.169.172.115
+cd ansible
+ansible-playbook -i inventory_web.ini playbook-web.yml
+```

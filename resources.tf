@@ -1,218 +1,86 @@
-resource "yandex_vpc_network" "sys-29-dw-vpc" {
-  name = "sys-29-dw-vpc"
-}
+resource "yandex_alb_target_group" "sys-29-dw-tg" {
+  name           = "sys-29-dw-tg"
 
-resource "yandex_vpc_subnet" "sys-29-dw-subnet-1" {
-  name           = "sys-29-dw-subnet-1"
-  zone           = "ru-central1-a"
-  network_id     = yandex_vpc_network.sys-29-dw-vpc.id
-  v4_cidr_blocks = ["10.29.1.0/24"]
-}
-resource "yandex_vpc_subnet" "sys-29-dw-subnet-2" {
-  name           = "sys-29-dw-subnet-2"
-  zone           = "ru-central1-b"
-  network_id     = yandex_vpc_network.sys-29-dw-vpc.id
-  route_table_id = yandex_vpc_route_table.rt.id
-  v4_cidr_blocks = ["10.29.2.0/24"]
-}
-resource "yandex_vpc_gateway" "nat_gateway" {
-  folder_id      = "b1gsbai0ti98eg8eife1"
-  name = "sys-29-dw-nat-gw"
-  shared_egress_gateway {}
-}
-resource "yandex_vpc_route_table" "rt" {
-  folder_id      = "b1gsbai0ti98eg8eife1"
-  name       = "route-table"
-  network_id = yandex_vpc_network.sys-29-dw-vpc.id
-
-  static_route {
-    destination_prefix = "0.0.0.0/0"
-    gateway_id         = yandex_vpc_gateway.nat_gateway.id
-  }
-}
-resource "yandex_vpc_subnet" "sys-29-dw-subnet-3" {
-  name           = "sys-29-dw-subnet-3"
-  zone           = "ru-central1-d"
-  network_id     = yandex_vpc_network.sys-29-dw-vpc.id
-  v4_cidr_blocks = ["10.29.3.0/24"]
-}
-#
-#
-#
-resource "yandex_compute_instance" "sys-29-dw-basthost" {
-  name        = "sys-29-dw-basthost"
-  hostname    = "sys-29-dw-basthost"
-  platform_id = "standard-v1"
-  zone           = "ru-central1-b"
-
-  resources {
-    cores  = 2
-    memory = 2
+  target {
+    subnet_id    = "${yandex_vpc_subnet.sys-29-dw-subnet-1.id}"
+    ip_address   = "${yandex_compute_instance.sys-29-dw-web1.network_interface.0.ip_address}"
   }
 
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
+  target {
+    subnet_id    = "${yandex_vpc_subnet.sys-29-dw-subnet-3.id}"
+    ip_address   = "${yandex_compute_instance.sys-29-dw-web2.network_interface.0.ip_address}"
+  }
+
+}
+resource "yandex_alb_backend_group" "sys-29-dw-bg" {
+  name                     = "sys-29-dw-bg"
+/*   session_affinity {
+    connection {
+      source_ip = "127.0.0.1"
+    }
+  } */
+
+  http_backend {
+    name                   = "sys-29-dw-backend"
+    weight                 = 1
+    port                   = 80
+    target_group_ids       = ["${yandex_alb_target_group.sys-29-dw-tg.id}"]
+    load_balancing_config {
+      panic_threshold      = 90
+    }    
+    healthcheck {
+      timeout              = "10s"
+      interval             = "2s"
+      healthy_threshold    = 10
+      unhealthy_threshold  = 15 
+      http_healthcheck {
+        path               = "/"
+      }
+    }
+  }
+}
+resource "yandex_alb_http_router" "sys-29-dw-rt" {
+  name      = "sys-29-dw-rt"
+/*   labels {
+    tf-label    = "sys-29-dw-rt"
+    empty-label = "s"
+  } */
+}
+resource "yandex_alb_load_balancer" "sys-29-dw-alb" {
+  name        = "sys-29-dw-alb"
+  network_id  = "${yandex_vpc_network.sys-29-dw-vpc.id}"
+
+
+  allocation_policy {
+    location {
+      zone_id   = "ru-central1-d"
+      subnet_id = "${yandex_vpc_subnet.sys-29-dw-subnet-3.id}"
     }
   }
 
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-2.id
-    nat       = true
-  }
-
-  metadata = {
-    user-data = "${file("./meta_bh.yml")}"
-  }
- 
-  scheduling_policy {
-    preemptible = "true"
-  }
-}
-resource "yandex_compute_instance" "sys-29-dw-zabbix" {
-  name        = "sys-29-dw-zabbix"
-  hostname    = "sys-29-dw-zabbix"
-  platform_id = "standard-v1"
-  zone           = "ru-central1-b"
-
-  resources {
-    cores  = 2
-    memory = 2
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
+  listener {
+    name = "sys-29-dw-lr"
+    endpoint {
+      address {
+        external_ipv4_address {
+        }
+      }
+      ports = [ 80 ]
+    }
+    http {
+      handler {
+        http_router_id = "${yandex_alb_http_router.sys-29-dw-rt.id}"
+      }
     }
   }
 
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-2.id
-    nat       = true
-  }
-
-  metadata = {
-    user-data = "${file("./meta_ext.yml")}"
-  }
-
-  scheduling_policy {
-    preemptible = "true"
-  }
-}
-resource "yandex_compute_instance" "sys-29-dw-kibana" {
-  name        = "sys-29-dw-kibana"
-  hostname    = "sys-29-dw-kibana"
-  platform_id = "standard-v1"
-  zone           = "ru-central1-b"
-
-  resources {
-    cores  = 2
-    memory = 2
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
+/*   log_options {
+    log_group_id = "<идентификатор_лог-группы>"
+    discard_rule {
+      http_codes          = ["<HTTP-код>"]
+      http_code_intervals = ["<класс_HTTP-кодов>"]
+      grpc_codes          = ["<gRPC-код>"]
+      discard_percent     = <доля_отбрасываемых_логов>
     }
-  }
-
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-2.id
-    nat       = true
-  }
-
-  metadata = {
-    user-data = "${file("./meta_ext.yml")}"
-  }
-
-  scheduling_policy {
-    preemptible = "true"
-  }
-}
-resource "yandex_compute_instance" "sys-29-dw-web1" {
-  name        = "sys-29-dw-web1"
-  hostname    = "sys-29-dw-web1"
-  platform_id = "standard-v1"
-  zone           = "ru-central1-a"
-
-  resources {
-    cores  = 2
-    memory = 2
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
-    }
-  }
-
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-1.id
-  }
-
-  metadata = {
-    user-data = "${file("./meta_user.yml")}"
-  }
-
-  scheduling_policy {
-    preemptible = "true"
-  }
-}
-resource "yandex_compute_instance" "sys-29-dw-web2" {
-  name        = "sys-29-dw-web2"
-  hostname    = "sys-29-dw-web2"
-  platform_id = "standard-v2"
-  zone           = "ru-central1-d"
-
-  resources {
-    cores  = 2
-    memory = 2
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
-    }
-  }
-
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-3.id
-  }
-
-  metadata = {
-    user-data = "${file("./meta_user.yml")}"
-  }
-
-  scheduling_policy {
-    preemptible = "true"
-  }
-}
-resource "yandex_compute_instance" "sys-29-dw-elas" {
-  name        = "sys-29-dw-elas"
-  hostname    = "sys-29-dw-elas"
-  platform_id = "standard-v1"
-  zone           = "ru-central1-a"
-
-  resources {
-    cores  = 2
-    memory = 6
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8hrffch8s5lqq8haf8"
-    }
-  }
-
-  network_interface {
-    subnet_id = yandex_vpc_subnet.sys-29-dw-subnet-1.id
-  }
-
-  metadata = {
-    user-data = "${file("./meta_user.yml")}"
-  }
-
-  scheduling_policy {
-    preemptible = "true"
-  }
+  } */
 }
