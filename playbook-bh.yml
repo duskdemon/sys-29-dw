@@ -1,6 +1,9 @@
 ---
 - hosts: basthost
   become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
   tasks:
 
   - name: making dirs for ansible files
@@ -15,13 +18,13 @@
     ansible.builtin.copy:
       src: ./templates/index.html.j2
       dest: /home/dusk/ansible/templates
-  - name: copying inventory elas
+  - name: copying inventory
     ansible.builtin.copy:
-      src: ./inventory_elas.ini
+      src: ./inventory.ini
       dest: /home/dusk/ansible
-  - name: copying inventory web
+  - name: copying playbook docker
     ansible.builtin.copy:
-      src: ./inventory_web.ini
+      src: ./playbook-dock.yml
       dest: /home/dusk/ansible
   - name: copying playbook elas
     ansible.builtin.copy:
@@ -30,4 +33,8 @@
   - name: copying playbook web
     ansible.builtin.copy:
       src: ./playbook-web.yml
+      dest: /home/dusk/ansible
+  - name: copying playbook kibana
+    ansible.builtin.copy:
+      src: ./playbook-kb.yml
       dest: /home/dusk/ansible

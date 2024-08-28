@@ -24,13 +24,15 @@ resources.tf - разворачиваем хосты:
 
 5. Подготовка Ansible плейбука для установки elastic.
 
-### Необходимо сделать
-
 6. Создание и настройка балансировщика для веб-хостов.
+
+### Необходимо сделать
 
 7. Подготовка Ansible плейбука для kibana, настройка связи с elastic.
 
-8. Подготовка Ansible плейбука для раскатки Zabbix на хостах.
+8. Подготовка Ansible плейбука для раскатки Zabbix на сервере.
+
+9. Установка и настройка Zabbix на хостах.
 
 ### Список файлов
 
@@ -55,7 +57,7 @@ network.tf - конфигурация сетей и подсетей
 
 main.tf - конфигурация ВМ
 
-resources.tf - конфигурация целевых групп, групп бэкэндов, роутера и балансировщика
+resources.tf - конфигурация целевых групп, групп бэкэндов, роутера, вхостов и балансировщика
 
 ### Порядок развертывания
 
@@ -67,6 +69,13 @@ resources.tf - конфигурация целевых групп, групп б
 terraform plan --out=current
 terraform apply current
 ```
+
+Получаем ip-адрес балансировщика:
+
+```
+yc alb load-balancer show sys-29-dw-alb | grep address
+```
+
 3. Запуск ансибл плейбука для передачи конфигов на бастион-хост (basthost):
 
 скорректировать ip-адрес basthost согласно output терраформа в inventory_bh.ini
@@ -74,10 +83,12 @@ terraform apply current
 ansible-playbook -i inventory_bh.ini playbook-bh.yml
 ```
 
-4. Подключаемся на basthost и запускаем плейбуки для раскатки web, ...
+4. Подключаемся на basthost и запускаем плейбуки для раскатки web, docker, ...
 
 ```
 ssh -i ~/.ssh/dw dusk@89.169.172.115
 cd ansible
-ansible-playbook -i inventory_web.ini playbook-web.yml
+ansible-playbook -i inventory.ini playbook-web.yml
+ansible-playbook -i inventory.ini playbook-dock.yml
+
 ```

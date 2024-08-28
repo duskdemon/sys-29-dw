@@ -46,6 +46,19 @@ resource "yandex_alb_http_router" "sys-29-dw-rt" {
     empty-label = "s"
   } */
 }
+resource "yandex_alb_virtual_host" "sys-29-dw-vh" {
+  name      = "sys-29-dw-vh"
+  http_router_id = yandex_alb_http_router.sys-29-dw-rt.id
+  route {
+    name = "main"
+    http_route {
+      http_route_action {
+        backend_group_id = yandex_alb_backend_group.sys-29-dw-bg.id
+        timeout = "3s"
+      }
+    }
+  }
+}
 resource "yandex_alb_load_balancer" "sys-29-dw-alb" {
   name        = "sys-29-dw-alb"
   network_id  = "${yandex_vpc_network.sys-29-dw-vpc.id}"

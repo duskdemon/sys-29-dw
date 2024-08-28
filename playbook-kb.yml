@@ -1,0 +1,30 @@
+---
+- hosts: kibana
+  become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
+  tasks:
+
+#Installing kibana
+  - name: Create kibana network
+    docker_network:
+      name: kiba_net
+  - name: Start kibana container
+    docker_container:
+      name: "kiba"
+      image: "bitnami/kibana:8.15.0"
+      env:
+        servername: "sys-29-dw-kibana"
+        ELASTICSEARCH_HOSTS: "http://sys-29-dw-elas:9200"
+        ELASTICSEARCH_USERNAME: "elastic"
+        ELASTICSEARCH_PASSWORD: "elas1234"
+      networks:
+      - name: "kiba_net"
+      ports:
+        - "5601:5601"
+      state: started
+      log_driver: "json-file"
+      log_options:
+        max-size: "256m"
+        max-file: "3"

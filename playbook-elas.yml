@@ -1,51 +1,11 @@
 ---
 - hosts: elastic
   become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
   tasks:
-#Installing docker
-  - name: install dependencies
-    apt:
-      name: "{{item}}"
-      state: present
-      update_cache: yes
-    loop:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg-agent
-      - software-properties-common
-  - name: add GPG key
-    apt_key:
-      url: https://download.docker.com/linux/debian/gpg
-      state: present
-    when: ansible_facts ['distribution'] == "Debian"
-  - name: add docker repository to apt
-    apt_repository:
-      repo: deb https://download.docker.com/linux/debian bookworm stable
-      state: present
-  - name: install docker
-    apt:
-      name: "{{item}}"
-      state: latest
-      update_cache: yes
-    loop:
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-  - name: check docker is active
-    service:
-      name: docker
-      state: started
-      enabled: yes
-  - name: Ensure group "docker" exists
-    ansible.builtin.group:
-      name: docker
-      state: present
-  - name: adding user to docker group
-    user:
-      name: dusk
-      groups: docker
-      append: yes
+
 #Installing elastic
   - name: Create elastic search volume
     docker_volume:
@@ -63,8 +23,8 @@
         ES_JAVA_OPTS: "-Xms512m -Xmx512m"
         xpack.security.enabled: "true"
         xpack.monitoring.collection.enabled: "true"
-        ELASTIC_USERNAME: "elas"
-        ELASTIC_PASSWORD: "1234"
+        ELASTIC_USERNAME: "elastic"
+        ELASTIC_PASSWORD: "elas1234"
       volumes:
       - "esdata:/usr/share/elasticsearch/data"
       ulimits:

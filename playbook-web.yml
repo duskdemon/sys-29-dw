@@ -1,8 +1,11 @@
 ---
 - hosts: web
   become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
   tasks:
-  
+
   - name: install apache2
     ansible.builtin.apt:
       name: apache2
