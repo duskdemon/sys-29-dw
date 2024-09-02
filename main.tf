@@ -66,7 +66,7 @@ resource "yandex_compute_instance" "sys-29-dw-kibana" {
 
   resources {
     cores  = 2
-    memory = 2
+    memory = 4
   }
 
   boot_disk {
@@ -96,7 +96,7 @@ resource "yandex_compute_instance" "sys-29-dw-elas" {
 
   resources {
     cores  = 2
-    memory = 6
+    memory = 8
   }
 
   boot_disk {

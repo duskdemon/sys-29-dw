@@ -5,37 +5,59 @@
     ansible_ssh_user: "dusk"
     ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
   tasks:
-
-#Installing elastic
-  - name: Create elastic search volume
-    docker_volume:
-      name: esdata
-      driver: local
+  - name: making dirs elk files
+    ansible.builtin.file:
+      path: /home/dusk/ansible/elk_conf
+      state: directory
+  - name: copying elas config
+    ansible.builtin.copy:
+      src: ./elk_conf/elas_config.yml
+      dest: /home/dusk/ansible/elk_conf
   - name: Create elastic search network
     docker_network:
       name: elas_net
+  - name: Create elastic search volume
+    docker_volume:
+      name: elas_data
+      driver: local
   - name: Start elastic search container
     docker_container:
       name: "elas"
-      image: "bitnami/elasticsearch"
+      image: "elasticsearch:7.17.18"
       env:
-        discovery.type: "single-node"
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-        xpack.security.enabled: "true"
-        xpack.monitoring.collection.enabled: "true"
+        ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
         ELASTIC_USERNAME: "elastic"
         ELASTIC_PASSWORD: "elas1234"
-      volumes:
-      - "esdata:/usr/share/elasticsearch/data"
-      ulimits:
-      - nofile:65535:65535
+        discovery.type: single-node
       networks:
-      - name: "elas_net"
+        - name: "elas_net"
       ports:
         - "9200:9200"
         - "9300:9300"
+      volumes:
+        - ./ansible/elk_conf/elas_config.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+        - elas_data:/usr/share/elasticsearch/data
       state: started
-      log_driver: "json-file"
-      log_options:
-        max-size: "256m"
-        max-file: "3"
+  - name: copying logs config
+    ansible.builtin.copy:
+      src: ./elk_conf/logs_config.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: copying logs pipeline
+    ansible.builtin.copy:
+      src: ./elk_conf/pipelines.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: Start logstash container
+    docker_container:
+      name: "logs"
+      image: "logstash:7.17.18"
+      volumes:
+        - ./ansible/elk_conf/logs_config.yml:/usr/share/logstash/config/logstash.yml:ro
+        - ./ansible/elk_conf/pipelines.yml:/opt/logstash/pipeline/logstash.conf:ro
+      env:
+        LS_JAVA_OPTS: "-Xmx1024m -Xms1024m"
+      ports:
+        - "5044:5044"
+        - "9600:9600"
+      networks:
+        - name: "elas_net"
+      state: started

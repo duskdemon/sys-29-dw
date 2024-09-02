@@ -1,0 +1,30 @@
+---
+- hosts: web
+  become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
+  tasks:
+  - name: making dirs for files
+    ansible.builtin.file:
+      path: /home/dusk/deb/
+      state: directory
+  - name: download filebeat
+    ansible.builtin.get_url:
+      url="https://mirror.yandex.ru/mirrors/elastic/7/pool/main/f/filebeat/filebeat-7.17.14-amd64.deb"
+      dest="/home/dusk/deb/filebeat.deb"
+  - name: install filebeat
+    ansible.builtin.apt: deb="/home/dusk/deb/filebeat.deb"
+  # - name: altering config filebeat
+  #   ansible.builtin.lineinfile:
+  #   path: /etc/selinux/config
+  #   regexp: '^SELINUX='
+  #   line: SELINUX=enforcing
+  # - name: check filebeat is active
+  #   service:
+  #     name: filebeat
+  #     state: started
+  #     enabled: yes
+  #
+  #sudo /usr/bin/filebeat -e -c filebeat.yml -d "publish"
+    

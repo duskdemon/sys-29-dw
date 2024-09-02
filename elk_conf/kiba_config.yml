@@ -1,0 +1,8 @@
+server.name: kibana
+server.host: 0.0.0.0
+server.publicBaseUrl: "http://sys-29-dw-kibana:5601"
+monitoring.ui.container.elasticsearch.enabled: true 
+
+elasticsearch.hosts: [ "http://sys-29-dw-elas:9200" ]
+elasticsearch.username: elastic
+elasticsearch.password: elas1234

@@ -83,12 +83,13 @@ yc alb load-balancer show sys-29-dw-alb | grep address
 ansible-playbook -i inventory_bh.ini playbook-bh.yml
 ```
 
-4. Подключаемся на basthost и запускаем плейбуки для раскатки web, docker, ...
-
+4. Подключаемся на basthost и запускаем плейбуки для раскатки web, docker, elastic, kibana, ...
 ```
 ssh -i ~/.ssh/dw dusk@89.169.172.115
 cd ansible
 ansible-playbook -i inventory.ini playbook-web.yml
 ansible-playbook -i inventory.ini playbook-dock.yml
+ansible-playbook -i inventory.ini playbook-elas.yml
+ansible-playbook -i inventory.ini playbook-kb.yml
 
 ```

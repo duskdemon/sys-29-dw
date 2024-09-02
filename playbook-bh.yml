@@ -38,3 +38,31 @@
     ansible.builtin.copy:
       src: ./playbook-kb.yml
       dest: /home/dusk/ansible
+  - name: copying playbook filebeat
+    ansible.builtin.copy:
+      src: ./playbook-fb.yml
+      dest: /home/dusk/ansible
+  - name: making dirs elk files
+    ansible.builtin.file:
+      path: /home/dusk/ansible/elk_conf
+      state: directory
+  - name: copying elas config
+    ansible.builtin.copy:
+      src: ./elk_conf/elas_config.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: copying kiba config
+    ansible.builtin.copy:
+      src: ./elk_conf/kiba_config.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: copying logs config
+    ansible.builtin.copy:
+      src: ./elk_conf/logs_config.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: copying logs pipeline
+    ansible.builtin.copy:
+      src: ./elk_conf/pipelines.yml
+      dest: /home/dusk/ansible/elk_conf
+  - name: copying filebeat config
+    ansible.builtin.copy:
+      src: ./elk_conf/filebeat.yml
+      dest: /home/dusk/ansible/elk_conf
