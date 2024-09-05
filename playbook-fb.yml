@@ -15,16 +15,16 @@
       dest="/home/dusk/deb/filebeat.deb"
   - name: install filebeat
     ansible.builtin.apt: deb="/home/dusk/deb/filebeat.deb"
-  # - name: altering config filebeat
-  #   ansible.builtin.lineinfile:
-  #   path: /etc/selinux/config
-  #   regexp: '^SELINUX='
-  #   line: SELINUX=enforcing
-  # - name: check filebeat is active
-  #   service:
-  #     name: filebeat
-  #     state: started
-  #     enabled: yes
-  #
-  #sudo /usr/bin/filebeat -e -c filebeat.yml -d "publish"
-    
+  - name: copying filebeat config
+    ansible.builtin.copy:
+      src: /home/dusk/ansible/elk_conf/filebeat.yml
+      dest: /etc/filebeat
+  - name: enable apache module
+    ansible.builtin.shell: filebeat modules enable apache
+  - name: setup filebeat
+    ansible.builtin.shell: filebeat setup -e
+  - name: filebeat service enable and start
+    ansible.builtin.service:
+      name: filebeat
+      state: restarted 
+      enabled: yes

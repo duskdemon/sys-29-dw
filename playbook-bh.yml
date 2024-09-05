@@ -54,15 +54,22 @@
     ansible.builtin.copy:
       src: ./elk_conf/kiba_config.yml
       dest: /home/dusk/ansible/elk_conf
-  - name: copying logs config
-    ansible.builtin.copy:
-      src: ./elk_conf/logs_config.yml
-      dest: /home/dusk/ansible/elk_conf
-  - name: copying logs pipeline
-    ansible.builtin.copy:
-      src: ./elk_conf/pipelines.yml
-      dest: /home/dusk/ansible/elk_conf
   - name: copying filebeat config
     ansible.builtin.copy:
       src: ./elk_conf/filebeat.yml
       dest: /home/dusk/ansible/elk_conf
+  - name: altering secrets in kiba
+    ansible.builtin.lineinfile:
+      path: /home/dusk/ansible/elk_conf/kiba_config.yml
+      regexp: '^elasticsearch.password:'
+      line: "elasticsearch.password: {{ elpass }}"
+  - name: altering secrets in filebeat
+    ansible.builtin.replace:
+      path: /home/dusk/ansible/elk_conf/filebeat.yml
+      regexp: '(\s+)  password: "elpass"(\s+.*)?$'
+      replace: '\1  password: "{{ elpass }}"\2'
+  - name: altering secrets in elas playbook
+    ansible.builtin.replace:
+      path: /home/dusk/ansible/playbook-elas.yml
+      regexp: '(\s+)ELASTIC_PASSWORD: "elpass"(\s+.*)?$'
+      replace: '\1ELASTIC_PASSWORD: "{{ elpass }}"\2'

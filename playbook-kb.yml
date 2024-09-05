@@ -12,7 +12,7 @@
   - name: copying kiba config
     ansible.builtin.copy:
       src: ./elk_conf/kiba_config.yml
-      dest: /home/dusk/ansible/elk_conf
+      dest: /home/dusk/ansible/elk_conf   
   - name: Create kibana network
     docker_network:
       name: kiba_net

@@ -1,6 +1,37 @@
-filebeat.inputs:
-- type: log
-  paths:
-    -  /var/log/apache2/access.log
-output.logstash:
-  hosts: ["sys-29-dw-elas:5044"]
+output.elasticsearch:
+  hosts: ["http://sys-29-dw-elas:9200"]
+  username: "elastic"
+  password: "elpass" 
+setup.kibana:
+    host: "http://sys-29-dw-kibana:5601" 
+    username: "elastic"  
+    password: "elpass"
+filebeat.config.modules:
+  enabled: true
+  path: ${path.config}/modules.d/*.yml
+filebeat.modules:
+#-------------------------------- Apache Module --------------------------------
+- module: apache
+  # Access logs
+  access:
+    enabled: true
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    #var.paths:
+
+    # Input configuration (advanced). Any input configuration option
+    # can be added under this section.
+    #input:
+
+  # Error logs
+  error:
+    enabled: true
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    #var.paths:
+
+    # Input configuration (advanced). Any input configuration option
+    # can be added under this section.
+    #input:

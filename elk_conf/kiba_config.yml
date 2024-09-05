@@ -5,4 +5,4 @@ monitoring.ui.container.elasticsearch.enabled: true
 
 elasticsearch.hosts: [ "http://sys-29-dw-elas:9200" ]
 elasticsearch.username: elastic
-elasticsearch.password: elas1234
+elasticsearch.password: "{{ elpass }}"

@@ -27,7 +27,7 @@
       env:
         ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
         ELASTIC_USERNAME: "elastic"
-        ELASTIC_PASSWORD: "elas1234"
+        ELASTIC_PASSWORD: "elpass"
         discovery.type: single-node
       networks:
         - name: "elas_net"
@@ -37,27 +37,4 @@
       volumes:
         - ./ansible/elk_conf/elas_config.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
         - elas_data:/usr/share/elasticsearch/data
-      state: started
-  - name: copying logs config
-    ansible.builtin.copy:
-      src: ./elk_conf/logs_config.yml
-      dest: /home/dusk/ansible/elk_conf
-  - name: copying logs pipeline
-    ansible.builtin.copy:
-      src: ./elk_conf/pipelines.yml
-      dest: /home/dusk/ansible/elk_conf
-  - name: Start logstash container
-    docker_container:
-      name: "logs"
-      image: "logstash:7.17.18"
-      volumes:
-        - ./ansible/elk_conf/logs_config.yml:/usr/share/logstash/config/logstash.yml:ro
-        - ./ansible/elk_conf/pipelines.yml:/opt/logstash/pipeline/logstash.conf:ro
-      env:
-        LS_JAVA_OPTS: "-Xmx1024m -Xms1024m"
-      ports:
-        - "5044:5044"
-        - "9600:9600"
-      networks:
-        - name: "elas_net"
       state: started

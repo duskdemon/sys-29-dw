@@ -44,6 +44,13 @@ scheme01.png - схема проекта
 
 index.html.j2 - шаблон файла index.html для веб-серверов
 
+/elk_conf
+
+elas_config.yml - конфиг elasticsearch
+
+filebeat.yml - конфиг filebeat
+
+kiba_config.yml - конфиг kibana
 
 ansible.cfg - конфиг Ансибл
 
@@ -80,16 +87,17 @@ yc alb load-balancer show sys-29-dw-alb | grep address
 
 скорректировать ip-адрес basthost согласно output терраформа в inventory_bh.ini
 ```
-ansible-playbook -i inventory_bh.ini playbook-bh.yml
+ansible-playbook -i inventory_bh.ini playbook-bh.yml -e secr.enc --ask-vault-pass
 ```
 
-4. Подключаемся на basthost и запускаем плейбуки для раскатки web, docker, elastic, kibana, ...
+4. Подключаемся на basthost и запускаем плейбуки для раскатки docker, elastic, kibana, web, filebeat, ...
 ```
 ssh -i ~/.ssh/dw dusk@89.169.172.115
 cd ansible
-ansible-playbook -i inventory.ini playbook-web.yml
-ansible-playbook -i inventory.ini playbook-dock.yml
-ansible-playbook -i inventory.ini playbook-elas.yml
-ansible-playbook -i inventory.ini playbook-kb.yml
+ansible-playbook -i inventory.ini playbook-dock.yml playbook-elas.yml playbook-kb.yml playbook-web.yml playbook-fb.yml ...
 
 ```
+
+5. Проверяем работу сайта. Обращаемся в браузере по адресу, который получил балансировщик (см. п. 2), и проверяем, что он корректно отдает страницы наших веб-серверов, нажав несколько раз F5. Должны отображаться разные имена хостов поочередно.
+
+6. Проверяем интерфейс кибаны, логинимся через браузер по внешнему адресу (смотрим terraform output) и порту 5601, вводим логин и пароль. Проверяем, что в интерфейсе кибаны появились логи с обоих хостов веб-кластера, открыв через меню discover и полистав события из лога веб-сервера apache, которые должны отображаться от обоих agent.hostname. 
