@@ -1,0 +1,48 @@
+---
+- hosts: zabbix_agent2
+  become: yes
+  vars:
+    ansible_ssh_user: "dusk"
+    ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
+  tasks:
+  - name: making dirs for files
+    ansible.builtin.file:
+      path: /home/dusk/deb/
+      state: directory
+  - name: download zabbix agent2
+    ansible.builtin.get_url:
+      url="https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_7.0-2+debian12_all.deb"
+      dest="/home/dusk/deb/za2.deb"
+  - name: removing file
+    ansible.builtin.file:
+      state: absent
+      path: /etc/apt/sources.list.d/repo_zabbix_com_zabbix_7_0_debian_pool_main_z_zabbix_release_zabbix_release_7_0_2_debian12_all_deb.list 
+  - name: install zabbixagent repo
+    ansible.builtin.apt: 
+      deb: "/home/dusk/deb/za2.deb"
+      update_cache: true
+  - name: install zabbix agent2
+    ansible.builtin.apt:
+      name: zabbix-agent2
+      update_cache: true
+      state: latest
+  - name: altering config file step 1
+    ansible.builtin.replace:
+      path: /etc/zabbix/zabbix_agent2.conf
+      regexp: '(\s+)Server=127.0.0.1(\s+.*)?$'
+      replace: '\1Server=0.0.0.0/0\2'
+  - name: altering config file step 2
+    ansible.builtin.replace:
+      path: /etc/zabbix/zabbix_agent2.conf
+      regexp: '(\s+)ServerActive=127.0.0.1(\s+.*)?$'
+      replace: '\1ServerActive=0.0.0.0/0\2'
+  - name: altering config file step 3
+    ansible.builtin.replace:
+      path: /etc/zabbix/zabbix_agent2.conf
+      regexp: '(\s+)Hostname=Zabbix server(\s+.*)?$'
+      replace: '\1Hostname={{ inventory_hostname }}\2'
+  - name: starting zabbix agent2 service
+    ansible.builtin.service:
+      name: zabbix-agent2
+      state: restarted 
+      enabled: yes

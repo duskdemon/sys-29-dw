@@ -1,13 +1,56 @@
 ---
-- name: Using Zabbix collection
-  hosts: zabbix
+- hosts: zabbix
   become: yes
   vars:
     ansible_ssh_user: "dusk"
     ansible_ssh_private_key_file: "/home/dusk/.ssh/dw"
-  collections:
-    - community.zabbix
-  roles:
-    - role: community.zabbix.zabbix_server
-      zabbix_server_database: pgsql
-      zabbix_server_database_long: pgsql
+  tasks:
+
+  - name: Create zabbix network
+    docker_network:
+      name: zabb_net
+
+  - name: Start postgresql container
+    docker_container:
+      name: "postgres-server"
+      image: "postgres:latest"
+      env:
+        POSTGRES_USER: "zabbix"
+        POSTGRES_PASSWORD: "zabbix_pwd"
+        POSTGRES_DB: "zabbix"
+      networks:
+        - name: "zabb_net"
+      state: started
+  - name: Start zabbix server container
+    docker_container:
+      name: "zabbix-server-pgsql"
+      image: "zabbix/zabbix-server-pgsql:alpine-7.0-latest"
+      env:
+        DB_SERVER_HOST: "postgres-server"
+        POSTGRES_USER: "zabbix"
+        POSTGRES_PASSWORD: "zabbix_pwd"
+        POSTGRES_DB: "zabbix"
+        ZBX_ENABLE_SNMP_TRAPS: "true"
+      networks:
+        - name: "zabb_net"
+      ports:
+        - "10051:10051"
+      state: started
+  - name: Start zabbix web-server container
+    docker_container:
+      name: "zabbix-web-nginx-pgsql"
+      image: "zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest"
+      env:
+        ZBX_SERVER_HOST: "zabbix-server-pgsql"
+        DB_SERVER_HOST: "postgres-server"
+        POSTGRES_USER: "zabbix"
+        POSTGRES_PASSWORD: "zabbix_pwd"
+        POSTGRES_DB: "zabbix"
+      networks:
+        - name: "zabb_net"
+      ports:
+        - "443:8443"
+        - "80:8080"
+      volumes:
+        - /etc/ssl/nginx:/etc/ssl/nginx:ro
+      state: started

@@ -43,6 +43,14 @@
     ansible.builtin.copy:
       src: ./playbook-fb.yml
       dest: /home/dusk/ansible
+  - name: copying playbook zabbix
+    ansible.builtin.copy:
+      src: ./playbook-zs.yml
+      dest: /home/dusk/ansible
+  - name: copying playbook zabbix agent2
+    ansible.builtin.copy:
+      src: ./playbook-za2.yml
+      dest: /home/dusk/ansible
   - name: making dirs elk files
     ansible.builtin.file:
       path: /home/dusk/ansible/elk_conf
