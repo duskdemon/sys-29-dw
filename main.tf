@@ -25,7 +25,7 @@ resource "yandex_compute_instance" "sys-29-dw-basthost" {
   }
  
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-zabbix" {
@@ -55,7 +55,7 @@ resource "yandex_compute_instance" "sys-29-dw-zabbix" {
   }
 
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-kibana" {
@@ -85,7 +85,7 @@ resource "yandex_compute_instance" "sys-29-dw-kibana" {
   }
 
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-elas" {
@@ -115,7 +115,7 @@ resource "yandex_compute_instance" "sys-29-dw-elas" {
   }
 
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-web1" {
@@ -144,7 +144,7 @@ resource "yandex_compute_instance" "sys-29-dw-web1" {
   }
 
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }
 resource "yandex_compute_instance" "sys-29-dw-web2" {
@@ -173,6 +173,6 @@ resource "yandex_compute_instance" "sys-29-dw-web2" {
   }
 
   scheduling_policy {
-    preemptible = "true"
+    preemptible = "false"
   }
 }

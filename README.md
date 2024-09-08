@@ -16,13 +16,13 @@ resources.tf - разворачиваем хосты:
 ip-адреса хостов:
 
 Балансировщик (доступ к сайту)
-51.250.36.229
+51.250.43.155
 
 Заббикс sys-29-dw-zabbix
-89.169.173.24
+89.169.166.109
 
 Кибана sys-29-dw-kibana
-84.201.166.37
+89.169.174.41
 
 2. Скриптом записываем в файл их внешние и внутренние адреса для дальнейшей с ними работы. 
  _Это не годится, используем для этого имена хостов, поправил файлы ТФ._
@@ -105,12 +105,12 @@ yc alb load-balancer show sys-29-dw-alb | grep address
 ansible-playbook -i inventory_bh.ini playbook-bh.yml --vault-id @prompt
 ```
 
-4. Подключаемся на basthost и запускаем плейбуки для раскатки docker, elastic, kibana, web, filebeat, zabbix.
+4. Подключаемся на basthost и запускаем плейбуки для раскатки docker, elastic, kibana, web, filebeat, zabbix, zabbix agent2.
 
 ```
 ssh -i ~/.ssh/dw dusk@89.169.172.115
 cd ansible
-ansible-playbook -i inventory.ini playbook-dock.yml playbook-elas.yml playbook-kb.yml playbook-web.yml playbook-fb.yml playbook-za2.yml
+ansible-playbook -i inventory.ini playbook-dock.yml playbook-elas.yml playbook-kb.yml playbook-web.yml playbook-fb.yml playbook-zs.yml playbook-za2.yml
 ```
 
 5. Проверяем работу сайта. Обращаемся в браузере по адресу, который получил балансировщик (см. п. 2), и проверяем, что он корректно отдает страницы наших веб-серверов, нажав несколько раз F5. Должны отображаться разные имена хостов поочередно:
